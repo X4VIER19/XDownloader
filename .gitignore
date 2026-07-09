@@ -1,0 +1,7 @@
+# Carpetas de compilación e IDEs
+build/
+.qtc_clangd/
+.cmake/
+
+# Archivos de configuración de usuario del IDE
+*.user
