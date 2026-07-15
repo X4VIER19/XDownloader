@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 #include <QButtonGroup>
+#include <QProcess>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,5 +25,8 @@ public:
 private:
     Ui::MainWindow *ui;
     QButtonGroup *modeButtonGroup;
+    QProcess *ytdlpProcess;
+    QNetworkAccessManager *networkManager;
+    QProcess *downloadProcess;
 };
 #endif // MAINWINDOW_H

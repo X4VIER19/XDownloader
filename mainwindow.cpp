@@ -2,6 +2,11 @@
 #include "ui_mainwindow.h"
 #include <QAbstractButton>
 #include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QSet>
+#include <QPixmap>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -138,6 +143,124 @@ MainWindow::MainWindow(QWidget *parent)
         if (!dir.isEmpty())
             ui->destLineEdit->setText(dir);
     });
+
+    ytdlpProcess = new QProcess(this);
+
+    connect(ui->analyzeButton, &QPushButton::clicked, this, [this]() {
+        QString url = ui->urlLineEdit->text().trimmed();
+        if (url.isEmpty()) return;
+
+        ui->analyzeButton->setEnabled(false);
+        ui->analyzeButton->setText("Analizando...");
+
+        ytdlpProcess->start("yt-dlp", QStringList() << "-J" << "--no-playlist" << url);
+    });
+
+    connect(ytdlpProcess, &QProcess::finished, this, [this](int exitCode) {
+        ui->analyzeButton->setEnabled(true);
+        ui->analyzeButton->setText("Analizar");
+
+        if (exitCode != 0) return;
+
+        QByteArray output = ytdlpProcess->readAllStandardOutput();
+        QJsonDocument doc = QJsonDocument::fromJson(output);
+        if (doc.isNull()) return;
+
+        QJsonObject obj = doc.object();
+        ui->titleLabel->setText(obj["title"].toString());
+        ui->channelLabel->setText(obj["uploader"].toString());
+
+        int totalSecs = obj["duration"].toInt();
+        int h = totalSecs / 3600;
+        int m = (totalSecs % 3600) / 60;
+        int s = totalSecs % 60;
+        ui->durationLabel->setText(QString("Duración: %1:%2:%3")
+                                       .arg(h, 2, 10, QChar('0'))
+                                       .arg(m, 2, 10, QChar('0'))
+                                       .arg(s, 2, 10, QChar('0')));
+        QJsonArray formats = obj["formats"].toArray();
+
+        QVector<QJsonObject> formatsVec;
+        for (const QJsonValue &f : formats)
+            formatsVec.append(f.toObject());
+
+        std::sort(formatsVec.begin(), formatsVec.end(), [](const QJsonObject &a, const QJsonObject &b) {
+            return a["height"].toInt() > b["height"].toInt();
+        });
+
+        ui->videoQualityComboBox->clear();
+        QSet<QString> resolucionesVistas;
+
+        for (const QJsonObject &fmt : formatsVec) {
+            QString vcodec = fmt["vcodec"].toString();
+            QString resolution = fmt["resolution"].toString();
+
+            if (vcodec == "none" || resolution.isEmpty() || resolution == "audio only")
+                continue;
+
+            if (!resolucionesVistas.contains(resolution)) {
+                resolucionesVistas.insert(resolution);
+                ui->videoQualityComboBox->addItem(resolution, fmt["format_id"].toString());
+            }
+        }
+
+        ui->audioQualityComboBox->clear();
+        QSet<QString> idiomasVistos;
+
+        for (const QJsonObject &fmt : formatsVec) {
+            QString acodec = fmt["acodec"].toString();
+            QString vcodec = fmt["vcodec"].toString();
+
+            // Solo formatos de audio puro
+            if (acodec == "none" || vcodec != "none")
+                continue;
+
+            QString lang = fmt["language"].toString();
+            if (lang.isEmpty()) lang = "Desconocido";
+
+            QString abr = QString::number(fmt["abr"].toDouble(), 'f', 0) + " kbps";
+            QString label = QString("%1 (%2)").arg(lang, abr);
+
+            if (!idiomasVistos.contains(lang)) {
+                idiomasVistos.insert(lang);
+                ui->audioQualityComboBox->addItem(label, fmt["format_id"].toString());
+            }
+        }
+
+        QString thumbnailUrl = obj["thumbnail"].toString();
+        if (!thumbnailUrl.isEmpty()) {
+            QNetworkRequest request(thumbnailUrl);
+            QNetworkReply *reply = networkManager->get(request);
+            connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+                if (reply->error() == QNetworkReply::NoError) {
+                    QPixmap pixmap;
+                    pixmap.loadFromData(reply->readAll());
+                    ui->thumbnailLabel->setPixmap(
+                        pixmap.scaled(ui->thumbnailLabel->size(),
+                                      Qt::KeepAspectRatio,
+                                      Qt::SmoothTransformation)
+                        );
+                }
+                reply->deleteLater();
+            });
+        }
+
+    });
+
+    networkManager = new QNetworkAccessManager(this);
+
+    connect(ui->addToQueueButton, &QPushButton::clicked, this, [this]() {
+        QString title = ui->titleLabel->text();
+        QString resolution = ui->videoQualityComboBox->currentText();
+        QString audio = ui->audioQualityComboBox->currentText();
+
+        if (title.isEmpty() || title == "Título del video") return;
+
+        QString itemText = QString("%1\n%2 | %3").arg(title, resolution, audio);
+        ui->queueListWidget->addItem(itemText);
+    });
+
+    downloadProcess = new QProcess(this);
 }
 
 MainWindow::~MainWindow()
