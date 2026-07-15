@@ -258,9 +258,43 @@ MainWindow::MainWindow(QWidget *parent)
 
         QString itemText = QString("%1\n%2 | %3").arg(title, resolution, audio);
         ui->queueListWidget->addItem(itemText);
+
+        // Construir argumentos de descarga
+        QString formatId = ui->videoQualityComboBox->currentData().toString();
+        QString audioId  = ui->audioQualityComboBox->currentData().toString();
+        QString dest     = ui->destLineEdit->text().trimmed();
+        QString url      = ui->urlLineEdit->text().trimmed();
+
+        if (dest.isEmpty()) {
+            ui->destLineEdit->setStyleSheet("border: 1px solid #ff003c;");
+            return;
+        }
+        ui->destLineEdit->setStyleSheet("");
+
+        QStringList args;
+        args << "-f" << QString("%1+%2").arg(formatId, audioId)
+             << "--merge-output-format" << ui->containerComboBox->currentText().toLower()
+             << "--output" << QString("%1/%(title)s.%(ext)s").arg(dest)
+             << url;
+
+        downloadProcess->start("yt-dlp", args);
     });
 
     downloadProcess = new QProcess(this);
+
+    connect(downloadProcess, &QProcess::finished, this, [this](int exitCode) {
+        QString errorOutput = downloadProcess->readAllStandardError();
+        qDebug() << "yt-dlp stderr:" << errorOutput;
+        qDebug() << "exit code:" << exitCode;
+
+        if (exitCode == 0) {
+            ui->queueListWidget->item(ui->queueListWidget->count() - 1)
+            ->setText(ui->queueListWidget->item(ui->queueListWidget->count() - 1)->text() + "\n✓ Completado");
+        } else {
+            ui->queueListWidget->item(ui->queueListWidget->count() - 1)
+            ->setText(ui->queueListWidget->item(ui->queueListWidget->count() - 1)->text() + "\n✗ Error");
+        }
+    });
 }
 
 MainWindow::~MainWindow()
