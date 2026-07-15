@@ -7,6 +7,8 @@
 #include <QJsonArray>
 #include <QSet>
 #include <QPixmap>
+#include <QStandardPaths>
+#include <QDir>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -15,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("XDownloader");
+
 
     // Estilos base
     setStyleSheet(R"(
@@ -127,6 +130,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->subsLangComboBox->setEnabled(false);
     connect(ui->subsCheckBox, &QCheckBox::toggled, ui->subsLangComboBox, &QComboBox::setEnabled);
 
+
+    ytdlpProcess = new QProcess(this);
+    downloadProcess = new QProcess(this);
+    networkManager = new QNetworkAccessManager(this);
+
+    QString defaultDest = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation) + "/XDownloader";
+    QDir().mkpath(defaultDest);
+    ui->destLineEdit->setText(defaultDest);
+
+
     connect(modeButtonGroup, &QButtonGroup::buttonClicked, this, [this](QAbstractButton *btn) {
         bool showVideo = (btn == ui->btnModeFull || btn == ui->btnModeVA || btn == ui->btnModeV);
         bool showAudio = (btn != ui->btnModeV);
@@ -144,7 +157,6 @@ MainWindow::MainWindow(QWidget *parent)
             ui->destLineEdit->setText(dir);
     });
 
-    ytdlpProcess = new QProcess(this);
 
     connect(ui->analyzeButton, &QPushButton::clicked, this, [this]() {
         QString url = ui->urlLineEdit->text().trimmed();
@@ -247,8 +259,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     });
 
-    networkManager = new QNetworkAccessManager(this);
-
     connect(ui->addToQueueButton, &QPushButton::clicked, this, [this]() {
         QString title = ui->titleLabel->text();
         QString resolution = ui->videoQualityComboBox->currentText();
@@ -269,6 +279,14 @@ MainWindow::MainWindow(QWidget *parent)
             ui->destLineEdit->setStyleSheet("border: 1px solid #ff003c;");
             return;
         }
+
+        QDir destDir(dest);
+        if (!destDir.exists()) {
+            if (!destDir.mkpath(dest)) {
+                ui->destLineEdit->setStyleSheet("border: 1px solid #ff003c;");
+                return;
+            }
+        }
         ui->destLineEdit->setStyleSheet("");
 
         QStringList args;
@@ -279,8 +297,6 @@ MainWindow::MainWindow(QWidget *parent)
 
         downloadProcess->start("yt-dlp", args);
     });
-
-    downloadProcess = new QProcess(this);
 
     connect(downloadProcess, &QProcess::finished, this, [this](int exitCode) {
         QString errorOutput = downloadProcess->readAllStandardError();
