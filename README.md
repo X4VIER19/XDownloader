@@ -1,38 +1,75 @@
 # XDownloader
-
 ![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 ![Qt](https://img.shields.io/badge/Qt-41CD52?style=for-the-badge&logo=qt&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-064F8C?style=for-the-badge&logo=cmake&logoColor=white)
 
-**XDownloader** es una aplicación de escritorio multiplataforma en desarrollo orientada a la gestión y descarga de contenido multimedia. El proyecto está siendo construido utilizando **C++**, el framework gráfico **Qt 6** y el sistema de construcción **CMake**, buscando ofrecer una interfaz nativa, fluida y eficiente.
+**XDownloader** es una aplicación de escritorio multiplataforma en desarrollo, orientada a la gestión y descarga de contenido multimedia. Construida con **C++ moderno**, el framework gráfico **Qt 6** y el sistema de construcción **CMake**, busca ofrecer una interfaz nativa, fluida y eficiente enfocada al público hispanohablante.
 
 ---
 
-## 🛠️ Estado y Mecánica del Proyecto
+## ✅ Funcionalidades Implementadas
 
-Al encontrarse actualmente en fase activa de desarrollo, el software se enfoca en la estructuración de su arquitectura base:
+- Análisis de URLs mediante `yt-dlp -J` de forma asíncrona (no bloquea la interfaz)
+- Selección de resolución y pista de audio reales obtenidas del video analizado
+- Descarga y visualización de la miniatura del video
+- Modos de descarga: Completo, Video+Audio, Solo Video, Solo Audio
+- Cola de descargas secuencial con progreso en tiempo real (velocidad, ETA, tamaño, porcentaje)
+- Selección de carpeta de destino con ruta por defecto (`Videos/XDownloader`)
+- Validación de rutas de destino antes de iniciar la descarga
+- Soporte para múltiples contenedores: MKV, MP4, WEBM
 
-1. **Interfaz Gráfica (UI):** Diseño modular basado en componentes nativos de Qt (`mainwindow.ui`) para la gestión de enlaces y control de descargas.
-2. **Lógica de Control:** Arquitectura orientada a objetos en C++ para preparar la futura integración con herramientas de extracción multimedia y manejo de flujos de red.
-3. **Construcción Portable:** Configuración automatizada mediante CMake para facilitar su compilación en diferentes sistemas operativos de manera unificada.
+---
+
+## 🚧 En Desarrollo
+
+- Cancelación de descargas con limpieza de archivos temporales (`.part`)
+- Soporte para lotes y playlists
+- Descarga y muxing de subtítulos
+- Pantalla de ajustes con preferencias persistentes (`QSettings`)
+- Expansión del sidebar con animación hover
+
+---
+
+## 📦 Dependencias
+
+| Herramienta | Versión mínima | Notas |
+|-------------|---------------|-------|
+| [Qt](https://www.qt.io/download) | 6.5 | Módulos: Widgets, Network |
+| [CMake](https://cmake.org/) | 3.19 | Sistema de construcción |
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | cualquiera | Debe estar en el PATH del sistema |
+| [FFmpeg](https://ffmpeg.org/) | cualquiera | Requerido por yt-dlp para muxing |
+
+---
+
+## 🛠️ Compilación
+
+```bash
+git clone https://github.com/X4VIER19/XDownloader.git
+cd XDownloader
+cmake -B build
+cmake --build build
+```
+
+> En Windows se recomienda usar Qt Creator con el kit MinGW 64-bit incluido en la instalación de Qt.
 
 ---
 
 ## 📁 Estructura del Repositorio
 
-La distribución del código fuente y los recursos de la interfaz se organiza de la siguiente manera:
-
 ```text
 XDownloader/
 │
-├── CMakeLists.txt      # Archivo de configuración principal de CMake para compilar con Qt
-├── main.cpp            # Punto de entrada de la aplicación (inicializa el ciclo de vida de Qt)
-├── mainwindow.cpp      # Implementación de la lógica e interacción de la ventana principal
-├── mainwindow.h        # Definición de la clase principal, señales y slots de la interfaz
-└── mainwindow.ui       # Diseño visual de la interfaz gráfica en formato XML (Qt Designer)
+├── CMakeLists.txt          # Configuración principal de CMake
+├── main.cpp                # Punto de entrada de la aplicación
+├── mainwindow.cpp          # Lógica e interacción de la ventana principal
+├── mainwindow.h            # Definición de la clase principal, señales y slots
+├── mainwindow.ui           # Diseño visual en formato XML (Qt Designer)
+├── downloadtaskwidget.cpp  # Widget de tarea individual en la cola de descargas
+└── downloadtaskwidget.h    # Definición del widget de tarea
 ```
 
 ---
 
-👥 Autores y Desarrollo
-    Sergio Xavier Fernandez (X4VIER19) - Desarrollador Principal
+## 👥 Autores y Desarrollo
+
+- **Sergio Xavier Fernandez** ([X4VIER19](https://github.com/X4VIER19)) — Desarrollador Principal****
