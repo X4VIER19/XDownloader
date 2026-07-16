@@ -11,6 +11,9 @@ qt_add_executable(XDownloader
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    downloadtaskwidget.cpp
+    downloadtaskwidget.h
+    downloadtaskwidget.h downloadtaskwidget.cpp
 )
 
 target_link_libraries(XDownloader

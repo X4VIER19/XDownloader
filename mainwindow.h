@@ -6,6 +6,8 @@
 #include <QProcess>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include "downloadtaskwidget.h"
+#include <QVBoxLayout>
 
 
 QT_BEGIN_NAMESPACE
@@ -28,5 +30,9 @@ private:
     QProcess *ytdlpProcess;
     QNetworkAccessManager *networkManager;
     QProcess *downloadProcess;
+    QVBoxLayout *queueLayout;
+    QList<DownloadTaskWidget*> taskWidgets;
+    int currentTaskIndex;
+    void startNextDownload();
 };
 #endif // MAINWINDOW_H
