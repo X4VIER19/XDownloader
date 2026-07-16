@@ -14,6 +14,8 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QSize>
+#include <QPainter>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -91,19 +93,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->btnModeFull->setChecked(true);
 
 
-    qDebug() << QFile::exists(":/icons/download-simple.svg");
-
     ui->btnDonwload->setText("");
-    ui->btnDonwload->setIcon(QIcon(":/icons/download-simple.svg"));
+    ui->btnDonwload->setIcon(coloredIcon(":/icons/download-simple.svg", QColor("#ff003c")));
     ui->btnDonwload->setIconSize(QSize(24, 24));
 
     ui->btnBatch->setText("");
-    ui->btnBatch->setIcon(QIcon(":/icons/stack.svg"));
+    ui->btnBatch->setIcon(coloredIcon(":/icons/stack.svg", QColor("#666666")));
     ui->btnBatch->setIconSize(QSize(24, 24));
 
     ui->btnSettings->setText("");
-    ui->btnSettings->setIcon(QIcon(":/icons/gear.svg"));
+    ui->btnSettings->setIcon(coloredIcon(":/icons/gear.svg", QColor("#666666")));
     ui->btnSettings->setIconSize(QSize(24, 24));
+
 
     connect(modeButtonGroup, &QButtonGroup::buttonClicked, this, [this](QAbstractButton *btn) {
         bool showVideo = (btn == ui->btnModeFull || btn == ui->btnModeVA || btn == ui->btnModeV);
@@ -321,6 +322,16 @@ void MainWindow::startNextDownload() {
         }
     }
     currentTaskIndex = -1;
+}
+
+QIcon MainWindow::coloredIcon(const QString &path, const QColor &color)
+{
+    QPixmap pixmap(path);
+    QPainter painter(&pixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(pixmap.rect(), color);
+    painter.end();
+    return QIcon(pixmap);
 }
 
 MainWindow::~MainWindow()

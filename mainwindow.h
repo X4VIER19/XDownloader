@@ -34,6 +34,7 @@ private:
     QList<DownloadTaskWidget*> taskWidgets;
     int currentTaskIndex;
     void startNextDownload();
+    QIcon coloredIcon(const QString &path, const QColor &color);
 
 };
 #endif // MAINWINDOW_H
