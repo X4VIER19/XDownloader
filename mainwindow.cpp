@@ -220,8 +220,22 @@ MainWindow::MainWindow(QWidget *parent)
         task->setStatus("En cola...");
 
         connect(task, &DownloadTaskWidget::cancelRequested, this, [this, task]() {
-            downloadProcess->kill();
-            task->setError("Cancelado por el usuario");
+            if (taskWidgets[currentTaskIndex] == task) {
+                QProcess::execute("taskkill", QStringList() << "/F" << "/T" << "/PID"
+                                                            << QString::number(downloadProcess->processId()));
+                downloadProcess->waitForFinished(3000);
+
+                QDir dir(task->getDestFolder());
+                QStringList partFiles = dir.entryList({"*.part", "*.ytdl", "*.tmp"}, QDir::Files);
+                for (const QString &file : partFiles)
+                    dir.remove(file);
+
+                task->setError("Cancelado por el usuario");
+                startNextDownload();
+            } else {
+                // Tarea en cola, solo marcarla como cancelada
+                task->setError("Cancelado por el usuario");
+            }
         });
 
         // Iniciar descarga
@@ -235,6 +249,8 @@ MainWindow::MainWindow(QWidget *parent)
              << url;
 
         task->setArgs(args);
+
+        task->setDestFolder(dest);
 
         // Solo iniciar si no hay descarga en curso
         if (currentTaskIndex == -1)

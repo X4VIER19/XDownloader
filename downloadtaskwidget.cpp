@@ -128,3 +128,13 @@ void DownloadTaskWidget::setError(const QString &errorMsg)
 bool DownloadTaskWidget::isPending() const { return pending; }
 void DownloadTaskWidget::setArgs(const QStringList &args) { downloadArgs = args; }
 QStringList DownloadTaskWidget::getArgs() const { return downloadArgs; }
+
+void DownloadTaskWidget::setDestFolder(const QString &folder)
+{
+    destFolder = folder;
+}
+
+QString DownloadTaskWidget::getDestFolder() const
+{
+    return destFolder;
+}

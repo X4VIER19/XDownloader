@@ -34,5 +34,6 @@ private:
     QList<DownloadTaskWidget*> taskWidgets;
     int currentTaskIndex;
     void startNextDownload();
+
 };
 #endif // MAINWINDOW_H

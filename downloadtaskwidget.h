@@ -26,6 +26,8 @@ public:
     void setStatus(const QString &status);
     void setCompleted();
     void setError(const QString &errorMsg);
+    void setDestFolder(const QString &folder);
+    QString getDestFolder() const;
 
 signals:
     void cancelRequested();
@@ -41,6 +43,7 @@ private:
     QPushButton  *cancelButton;
     QStringList downloadArgs;
     bool pending = true;
+    QString destFolder;
 };
 
 #endif // DOWNLOADTASKWIDGET_H
