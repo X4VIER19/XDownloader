@@ -13,7 +13,16 @@ qt_add_executable(XDownloader
     mainwindow.ui
     downloadtaskwidget.cpp
     downloadtaskwidget.h
-    downloadtaskwidget.h downloadtaskwidget.cpp
+    downloadtaskwidget.h
+    downloadtaskwidget.cpp
+)
+
+qt_add_resources(XDownloader "resources"
+    PREFIX "/"
+    FILES
+        icons/download-simple.svg
+        icons/gear.svg
+        icons/stack.svg
 )
 
 target_link_libraries(XDownloader

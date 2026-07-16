@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QSize>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -88,6 +89,21 @@ MainWindow::MainWindow(QWidget *parent)
     modeButtonGroup->addButton(ui->btnModeV);
     modeButtonGroup->addButton(ui->btnModeA);
     ui->btnModeFull->setChecked(true);
+
+
+    qDebug() << QFile::exists(":/icons/download-simple.svg");
+
+    ui->btnDonwload->setText("");
+    ui->btnDonwload->setIcon(QIcon(":/icons/download-simple.svg"));
+    ui->btnDonwload->setIconSize(QSize(24, 24));
+
+    ui->btnBatch->setText("");
+    ui->btnBatch->setIcon(QIcon(":/icons/stack.svg"));
+    ui->btnBatch->setIconSize(QSize(24, 24));
+
+    ui->btnSettings->setText("");
+    ui->btnSettings->setIcon(QIcon(":/icons/gear.svg"));
+    ui->btnSettings->setIconSize(QSize(24, 24));
 
     connect(modeButtonGroup, &QButtonGroup::buttonClicked, this, [this](QAbstractButton *btn) {
         bool showVideo = (btn == ui->btnModeFull || btn == ui->btnModeVA || btn == ui->btnModeV);
@@ -229,7 +245,6 @@ MainWindow::MainWindow(QWidget *parent)
                 QStringList partFiles = dir.entryList({"*.part", "*.ytdl", "*.tmp"}, QDir::Files);
                 for (const QString &file : partFiles)
                     dir.remove(file);
-
                 task->setError("Cancelado por el usuario");
                 startNextDownload();
             } else {
